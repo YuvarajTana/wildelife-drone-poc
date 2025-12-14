@@ -37,9 +37,12 @@ ENV/
 .env
 .env.local
 
-# Model weights
-backend/weights/yolov8n.pt
-weights/yolov8n.pt
+# Model weights - ignore all .pt files
+backend/weights/*.pt
+backend/weights/**/*.pt
+weights/*.pt
+weights/**/*.pt
+*.pt
 
 # OS
 .DS_Store
