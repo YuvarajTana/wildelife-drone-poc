@@ -43,6 +43,8 @@ data/results/*
 # Model weights
 backend/weights/*.pt
 !backend/weights/.gitkeep
+yolov8*.pt
+yolo11*.pt
 
 # IDE
 .vscode/
