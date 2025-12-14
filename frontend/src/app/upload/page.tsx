@@ -30,6 +30,9 @@ export default function UploadPage() {
           },
         });
         
+        // Store result in sessionStorage
+        sessionStorage.setItem('latestResult', JSON.stringify(result));
+        
         // Redirect to results page
         router.push(`/results?type=image&file=${result.filename}`);
       } else {
@@ -41,6 +44,9 @@ export default function UploadPage() {
             setProgress(percentCompleted);
           },
         });
+        
+        // Store result in sessionStorage
+        sessionStorage.setItem('latestResult', JSON.stringify(result));
         
         // Redirect to results page
         router.push(`/results?type=video&file=${result.filename}`);

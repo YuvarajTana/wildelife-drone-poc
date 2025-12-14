@@ -234,15 +234,31 @@ class VideoProcessingService:
         
         processing_time = time.time() - start_time
         
+        # Calculate detection summary (species count across all tracks)
+        detection_summary = {}
+        total_detections = 0
+        for track in tracks:
+            class_name = track.get('class_name', 'unknown')
+            detection_summary[class_name] = detection_summary.get(class_name, 0) + 1
+            total_detections += track.get('total_frames', 0)
+        
+        from datetime import datetime
+        
         return {
             "success": True,
             "filename": file.filename,
+            "annotated_video": f"/results/{output_filename}",
+            "annotated_video_url": f"/results/{output_filename}",  # Keep for backward compatibility
+            "total_frames_processed": processed_frames,
             "total_frames": total_frames,
             "processed_frames": processed_frames,
+            "total_detections": total_detections,
+            "unique_tracks": len(tracks),
             "tracks": tracks,
-            "annotated_video_url": f"/results/{output_filename}",
             "processing_time": processing_time,
             "total_tracks": len(tracks),
+            "detection_summary": detection_summary,
+            "timestamp": datetime.now().isoformat(),
             "metadata": metadata
         }
     

@@ -1,0 +1,25 @@
+{
+  "filename": "Screenshot 2025-12-14 at 11.47.56\u202fAM.png",
+  "detections": [
+    {
+      "id": 0,
+      "class": "zebra",
+      "confidence": 0.5259347558021545,
+      "bbox": [
+        518.4481811523438,
+        1022.5374755859375,
+        882.5772094726562,
+        1119.30322265625
+      ],
+      "class_id": 22
+    }
+  ],
+  "groups": [],
+  "metadata": {
+    "width": 1210,
+    "height": 1906,
+    "format": "PNG"
+  },
+  "total_detections": 1,
+  "total_groups": 0
+}

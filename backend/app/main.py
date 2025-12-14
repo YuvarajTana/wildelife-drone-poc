@@ -237,6 +237,7 @@ if __name__ == "__main__":
         "app.main:app",
         host=settings.API_HOST,
         port=settings.API_PORT,
-        reload=settings.PYTHON_ENV == "development"
+        reload=settings.PYTHON_ENV == "development",
+        reload_exclude=["venv/*", "*/venv/*", "__pycache__/*", "*.pyc", ".git/*", "data/*"]
     )
 

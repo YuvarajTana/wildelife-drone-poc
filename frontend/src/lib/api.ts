@@ -2,74 +2,34 @@ import axios, { AxiosProgressEvent } from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-const apiClient = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'multipart/form-data',
-  },
-});
-
 export interface Detection {
-  id: number;
-  class: string;
+  bbox: [number, number, number, number]; // [x1, y1, x2, y2]
   confidence: number;
-  bbox: number[];
-  group_id?: number;
+  class: string;
+  class_id: number;
 }
 
-export interface Group {
-  group_id: number;
-  count: number;
-  center: number[];
-  members: number[];
-}
-
-export interface GPSCoordinates {
-  latitude: number;
-  longitude: number;
-  altitude?: number;
-}
-
-export interface Metadata {
-  gps?: GPSCoordinates;
-  timestamp?: string;
-  camera_make?: string;
-  camera_model?: string;
-  width?: number;
-  height?: number;
-}
-
-export interface ImageDetectionResponse {
-  success: boolean;
+export interface DetectionResult {
   filename: string;
+  original_image: string;
+  annotated_image: string;
   detections: Detection[];
-  groups: Group[];
-  metadata?: Metadata;
-  annotated_image_url: string;
-  processing_time: number;
   total_detections: number;
-}
-
-export interface Track {
-  track_id: number;
-  class_name: string;
-  first_frame: number;
-  last_frame: number;
-  total_frames: number;
-  confidence_avg: number;
-  trajectory: number[][];
-}
-
-export interface VideoTrackingResponse {
-  success: boolean;
-  filename: string;
-  total_frames: number;
-  processed_frames: number;
-  tracks: Track[];
-  annotated_video_url: string;
+  detection_summary: Record<string, number>;
   processing_time: number;
-  total_tracks: number;
-  metadata?: Metadata;
+  timestamp: string;
+}
+
+export interface VideoTrackingResult {
+  filename: string;
+  annotated_video: string;
+  total_frames_processed: number;
+  total_detections: number;
+  unique_tracks: number;
+  tracks: any[];
+  detection_summary: Record<string, number>;
+  processing_time: number;
+  timestamp: string;
 }
 
 export interface UploadOptions {
@@ -77,69 +37,53 @@ export interface UploadOptions {
 }
 
 export const api = {
+  // Health check
   async healthCheck() {
     const response = await axios.get(`${API_URL}/health`);
     return response.data;
   },
 
-  async detectImage(
-    file: File, 
-    options?: UploadOptions & { confidence?: number; enableGrouping?: boolean }
-  ): Promise<ImageDetectionResponse> {
+  // Detect animals in image
+  async detectImage(file: File, options?: UploadOptions): Promise<DetectionResult> {
     const formData = new FormData();
     formData.append('file', file);
-    
-    if (options?.confidence) {
-      formData.append('confidence', options.confidence.toString());
-    }
-    if (options?.enableGrouping !== undefined) {
-      formData.append('enable_grouping', options.enableGrouping.toString());
-    }
+    formData.append('confidence', '0.25');
+    formData.append('enable_grouping', 'true');
 
-    const response = await apiClient.post<ImageDetectionResponse>(
-      '/api/detect/image',
-      formData,
-      {
-        onUploadProgress: options?.onUploadProgress,
-      }
-    );
-    
+    const response = await axios.post(`${API_URL}/api/detect/image`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: options?.onUploadProgress,
+    });
+
     return response.data;
   },
 
-  async trackVideo(
-    file: File,
-    options?: UploadOptions & { confidence?: number; fps?: number; maxFrames?: number }
-  ): Promise<VideoTrackingResponse> {
+  // Track animals in video
+  async trackVideo(file: File, options?: UploadOptions): Promise<VideoTrackingResult> {
     const formData = new FormData();
     formData.append('file', file);
-    
-    if (options?.confidence) {
-      formData.append('confidence', options.confidence.toString());
-    }
-    if (options?.fps) {
-      formData.append('fps', options.fps.toString());
-    }
-    if (options?.maxFrames) {
-      formData.append('max_frames', options.maxFrames.toString());
-    }
+    formData.append('confidence', '0.25');
+    formData.append('fps', '5');
 
-    const response = await apiClient.post<VideoTrackingResponse>(
-      '/api/detect/video',
-      formData,
-      {
-        onUploadProgress: options?.onUploadProgress,
-      }
-    );
-    
+    const response = await axios.post(`${API_URL}/api/detect/video`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: options?.onUploadProgress,
+    });
+
     return response.data;
   },
 
-  async listResults() {
+  // Get results list
+  async getResults() {
     const response = await axios.get(`${API_URL}/api/results`);
     return response.data;
   },
 
+  // Download result file
   async downloadResult(filename: string) {
     const response = await axios.get(`${API_URL}/api/download/${filename}`, {
       responseType: 'blob',
@@ -147,8 +91,14 @@ export const api = {
     return response.data;
   },
 
-  getResultUrl(path: string) {
+  // Delete result
+  async deleteResult(filename: string) {
+    const response = await axios.delete(`${API_URL}/api/results/${filename}`);
+    return response.data;
+  },
+
+  // Get image URL
+  getImageUrl(path: string): string {
     return `${API_URL}${path}`;
   },
 };
-

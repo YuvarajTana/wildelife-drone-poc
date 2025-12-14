@@ -64,12 +64,16 @@ class DetectionResponse(BaseModel):
     """Image detection response"""
     success: bool = True
     filename: str
+    original_image: str
+    annotated_image: str
+    annotated_image_url: str  # For backward compatibility
     detections: List[Detection]
     groups: Optional[List[Group]] = []
     metadata: Optional[Metadata] = None
-    annotated_image_url: str
     processing_time: float
     total_detections: int
+    detection_summary: Dict[str, int]
+    timestamp: str
 
 
 class Track(BaseModel):
@@ -87,12 +91,18 @@ class VideoTrackingResponse(BaseModel):
     """Video tracking response"""
     success: bool = True
     filename: str
+    annotated_video: str
+    annotated_video_url: str  # For backward compatibility
+    total_frames_processed: int
     total_frames: int
     processed_frames: int
+    total_detections: int
+    unique_tracks: int
     tracks: List[Track]
-    annotated_video_url: str
     processing_time: float
     total_tracks: int
+    detection_summary: Dict[str, int]
+    timestamp: str
     metadata: Optional[Metadata] = None
 
 
