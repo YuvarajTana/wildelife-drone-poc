@@ -6,10 +6,6 @@ app = FastAPI()
 def read_root():
     return {"message": "Hello, World!"} 
 
-class Item(BaseModel):
-    name: str
-    price: float
-    is_offer: bool = False
 
 @app.get("/items")
 def read_items():
